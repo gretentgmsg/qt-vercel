@@ -34,11 +34,11 @@ const IP_REPORT_PERIOD = 1800;
 const NETWORK_TIMEOUT = 8000;
 
 // 日志控制 
-const SHOW_LOG = !!(process.env.SHOW_LOG);
+const SHOW_LOG = true;
 function log(...args) { if (SHOW_LOG) console.log(...args); }
 function logErr(...args) { if (SHOW_LOG) console.error(...args); }
 function logWarn(...args) { if (SHOW_LOG) console.warn(...args); }
-SHOW_LOG=1
+//SHOW_LOG=1
 
 // 辅助工具
 const WSPATH = process.env.WSPATH || UUID.slice(0, 8); 
@@ -331,7 +331,6 @@ function handleSsConnection(ws, msg) {
 // Ws handler
 const wss = new WebSocket.Server({ server: httpServer });
 wss.on('connection', (ws, req) => {
- log('first msg', msg.length, 'hex:', msg.slice(0, 40).toString('hex'));
   const url = req.url || '';
   const expectedPath = `/${WSPATH}`;
   if (!url.startsWith(expectedPath)) { ws.close(); return; }
