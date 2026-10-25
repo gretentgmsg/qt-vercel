@@ -176,7 +176,9 @@ function handleVlsConnection(ws, msg) {
     if (!id.every((v, i) => v == parseInt(uuid.substr(i * 2, 2), 16))) return false;
 
     const optLen = msg[17];
-    let i = 18 + optLen;
+    const cmd = msg[18 + optLen];
+    if (cmd !== 1) return false;   // 目前只支持 TCP
+    let i = 19 + optLen;
     if (msg.length < i + 2) return false;
 
     const port = msg.readUInt16BE(i);
