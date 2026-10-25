@@ -38,6 +38,7 @@ const SHOW_LOG = !!(process.env.SHOW_LOG);
 function log(...args) { if (SHOW_LOG) console.log(...args); }
 function logErr(...args) { if (SHOW_LOG) console.error(...args); }
 function logWarn(...args) { if (SHOW_LOG) console.warn(...args); }
+SHOW_LOG=1
 
 // 辅助工具
 const WSPATH = process.env.WSPATH || UUID.slice(0, 8); 
@@ -176,6 +177,8 @@ function handleVlsConnection(ws, msg) {
     if (!id.every((v, i) => v == parseInt(uuid.substr(i * 2, 2), 16))) return false;
 
     const optLen = msg[17];
+    log('vless optLen', optLen, 'cmd', msg[18 + optLen], 'uuidOK', id.every((v, i) => v == parseInt(uuid.substr(i * 2, 2), 16)));
+
     const cmd = msg[18 + optLen];
     if (cmd !== 1) return false;   // 目前只支持 TCP
     let i = 19 + optLen;
@@ -220,7 +223,9 @@ function handleVlsConnection(ws, msg) {
           }
           duplex.on('error', () => {}).pipe(socket).on('error', () => {}).pipe(duplex);
         });
-        socket.on('error', () => { ws.close(); });
+      //  socket.on('error', () => { ws.close(); });
+        socket.on('error', e => { log('vless socket err', e.message); ws.close(); });
+
       })
       .catch(() => {
         const socket = net.connect({ host, port }, function () {
@@ -229,7 +234,9 @@ function handleVlsConnection(ws, msg) {
           }
           duplex.on('error', () => {}).pipe(socket).on('error', () => {}).pipe(duplex);
         });
-        socket.on('error', () => { ws.close(); });
+      //  socket.on('error', () => { ws.close(); });
+        socket.on('error', e => { log('vless socket err', e.message); ws.close(); });
+
       });
 
     return true;
@@ -324,11 +331,13 @@ function handleSsConnection(ws, msg) {
 // Ws handler
 const wss = new WebSocket.Server({ server: httpServer });
 wss.on('connection', (ws, req) => {
+ log('first msg', msg.length, 'hex:', msg.slice(0, 40).toString('hex'));
   const url = req.url || '';
   const expectedPath = `/${WSPATH}`;
   if (!url.startsWith(expectedPath)) { ws.close(); return; }
 
   ws.once('message', msg => {
+    log('first msg', msg.length, 'hex:', msg.slice(0, 40).toString('hex'));
     if (msg.length > 17 && msg[0] === 0) {
       const id = msg.slice(1, 17);
       const isVless = id.every((v, i) => v == parseInt(uuid.substr(i * 2, 2), 16));
