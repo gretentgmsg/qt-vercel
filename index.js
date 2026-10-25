@@ -34,7 +34,7 @@ const IP_REPORT_PERIOD = 1800;
 const NETWORK_TIMEOUT = 8000;
 
 // 日志控制 
-const SHOW_LOG = true;
+const SHOW_LOG =  !!(process.env.SHOW_LOG);
 function log(...args) { if (SHOW_LOG) console.log(...args); }
 function logErr(...args) { if (SHOW_LOG) console.error(...args); }
 function logWarn(...args) { if (SHOW_LOG) console.warn(...args); }
